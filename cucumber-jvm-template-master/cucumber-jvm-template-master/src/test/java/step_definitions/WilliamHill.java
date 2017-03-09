@@ -2,6 +2,7 @@ package step_definitions;
 
 import static org.testng.AssertJUnit.assertEquals;
 
+import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
@@ -10,6 +11,7 @@ import org.openqa.selenium.support.PageFactory;
 
 import pageobjects.HomePage;
 import pageobjects.FootballPage;
+import pageobjects.StakePage;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.api.java.en.Given;
@@ -60,7 +62,6 @@ public class WilliamHill {
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		//Click the first Home odds button
 		FootballPage.Home_odds_btns.get(0).click();
-		//driver.findElements(By.xpath("//*[starts-with(@id, 'OB_OU')]")).get(0).click();
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		//Thread.sleep(5000);
 	}
@@ -68,7 +69,6 @@ public class WilliamHill {
 	@When("^Enter \"([^\"]*)\" on bet$")
 	public void enter_value_on_bet(String input_stake) throws Throwable{
 		//enter 0.05 on stake input
-		//driver.findElement(By.xpath("//*[starts-with(@id, 'stake-input_')]")).sendKeys("0.05");
 		FootballPage.Stake_input.sendKeys(input_stake);
 		stake = Double.parseDouble(input_stake);
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -76,21 +76,23 @@ public class WilliamHill {
 	
 	@Then("^Validate Total stake value, odds and return value$")
 	public void validate_total_stake_odds_return_value() throws Throwable{
+		//initElements again after key in stake
+		PageFactory.initElements(driver, StakePage.class);
 		//Verify the stake value
-		//assertEquals("Wrong stake value", Double.toString(stake), driver.findElement(By.className("betslip-footer__total-stake")).findElement(By.id("total-stake-price")).getText());
-		assertEquals("Wrong stake value", Double.toString(stake), FootballPage.total_stake.findElement(By.id("total-stake-price")).getText());
+		assertEquals("Wrong stake value", Double.toString(stake), StakePage.total_stake.getText());
 		//Get the odds value
-		//odds = driver.findElement(By.xpath("//*[starts-with(@id, 'bet-price_')]")).getText();
-		odds = FootballPage.bet_price.getText();
+		odds = StakePage.bet_price.getText();
+		System.out.println("odds is " + odds);
 		//Calculate the return value
 		String[] parts = odds.split("/");
-		double odds_value = Integer.parseInt(parts[0]) / Integer.parseInt(parts[1]);
-		double return_value = (odds_value * stake) + stake ;
+		double odds_value = Double.parseDouble(parts[0]) / Double.parseDouble(parts[1]);
+		String return_value = new DecimalFormat("##.##").format((odds_value * stake) + stake) ;
+		
 		System.out.println("The odd value is " + odds_value);
 		System.out.println("The return value is " + return_value);
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		//Verify the correct return value
-		//assertEquals("Wrong return value", Double.toString(return_value), driver.findElement(By.className("betslip-footer__to-return")).findElement(By.id("total-stake-price")).getText() );
-		assertEquals("Wrong return value", Double.toString(return_value), FootballPage.total_return.findElement(By.id("total-stake-price")).getText());
+		assertEquals("Wrong return value", return_value, StakePage.total_return.getText());
 	}
 
 }

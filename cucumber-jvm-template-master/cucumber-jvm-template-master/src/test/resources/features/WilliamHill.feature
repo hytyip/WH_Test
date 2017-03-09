@@ -7,7 +7,7 @@ Feature: Bet on English Premier League event
     When Click on Football
     Then Validate url
     When Click Home on the first event
-    And  Enter 0.05 on bet
+    And  Enter "0.05" on bet
     Then Validate Total stake value, odds and return value
     
     
